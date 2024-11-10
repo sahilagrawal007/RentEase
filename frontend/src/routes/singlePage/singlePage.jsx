@@ -39,7 +39,7 @@ function SinglePage() {
                   <img src="/pin.png" alt="" />
                   <span>{post.address}</span>
                 </div>
-                <div className="price">$ {post.price}</div>
+                <div className="price">₹ {post.price}</div>
               </div>
               <div className="user">
                 <img src={post.user.avatar} alt="" />
@@ -74,11 +74,7 @@ function SinglePage() {
               <img src="/pet.png" alt="" />
               <div className="featureText">
                 <span>Pet Policy</span>
-                {post.postDetail.pet === "allowed" ? (
-                  <p>Pets Allowed</p>
-                ) : (
-                  <p>Pets not Allowed</p>
-                )}
+                {post.postDetail.pet === "allowed" ? <p>Pets Allowed</p> : <p>Pets not Allowed</p>}
               </div>
             </div>
             <div className="feature">
@@ -138,7 +134,7 @@ function SinglePage() {
             <Map items={[post]} />
           </div>
           <div className="buttons">
-            <button >
+            <button>
               <img src="/chat.png" alt="" />
               Send a Message
             </button>
