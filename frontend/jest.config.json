@@ -1,0 +1,18 @@
+{
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "src/**/*.{js,jsx}"
+  ],
+  "moduleNameMapper": {
+    "\\.(css|scss|less)$": "<rootDir>/src/__mocks__/styleMock.js"
+  },
+  "transformIgnorePatterns": [
+    "[/\\\\]node_modules[/\\\\].+[^esm]\\.(js|jsx|mjs|cjs|ts|tsx)$",
+    "^.+\\.module\\.(css|sass|scss)$"
+  ],
+  "coverageDirectory": "coverage",
+  "testEnvironment": "jsdom",
+  "setupFilesAfterEnv": [
+    "<rootDir>/jest.setup.js"
+  ]
+}
