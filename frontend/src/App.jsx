@@ -11,6 +11,7 @@ import NewPostPage from "./routes/newPostPage/newPostPage";
 import { listPageLoader, profilePageLoader, singlePageLoader } from "./lib/loaders";
 import About from "./routes/aboutPage/aboutPage";
 import ContactPage from "./routes/contactPage/contactPage";
+import Chat from "./components/chat/Chat";
 
 function App() {
   const router = createBrowserRouter([
@@ -66,6 +67,14 @@ function App() {
         {
           path: "/add",
           element: <NewPostPage />,
+        },
+        {
+          path: "/singlepage",
+          element: <SinglePage/>, 
+        },
+        {
+          path: "/chat",
+          element: <Chat />,
         },
       ],
     },

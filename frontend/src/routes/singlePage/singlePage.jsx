@@ -13,6 +13,10 @@ function SinglePage() {
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const handleChatRedirect = () => {
+    navigate("/chat");
+  };
+
   const handleSave = async () => {
     if (!currentUser) {
       navigate("/login");
@@ -134,7 +138,7 @@ function SinglePage() {
             <Map items={[post]} />
           </div>
           <div className="buttons">
-            <button>
+            <button onClick={handleChatRedirect}>
               <img src="/chat.png" alt="" />
               Send a Message
             </button>

@@ -45,14 +45,7 @@ function Filter() {
       <div className="bottom">
         <div className="item">
           <label htmlFor="type">Type</label>
-          <select
-            name="type"
-            id="type"
-            onChange={handleChange}
-            defaultValue={query.type}
-          >
-            <option value="">any</option>
-            <option value="buy">Buy</option>
+          <select name="type" id="type" onChange={handleChange} defaultValue={query.type}>
             <option value="rent">Rent</option>
           </select>
         </div>
