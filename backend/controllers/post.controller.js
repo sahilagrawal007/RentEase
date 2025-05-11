@@ -1,26 +1,70 @@
 import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 
+// Haversine formula: returns distance (in km) between two coords
+function getDistanceInKm(lat1, lon1, lat2, lon2) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const R = 6371; // Earth radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+
 export const getPosts = async (req, res) => {
-  const query = req.query;
+  const {
+    city,
+    type,
+    property,
+    bedroom,
+    minPrice,
+    maxPrice,
+    lat,
+    lon,
+    radius = "5", // default radius = 5 km
+  } = req.query;
+
+  const baseWhere = {
+    type: type || undefined,
+    property: property || undefined,
+    bedroom: parseInt(bedroom) || undefined,
+    price: {
+      gte: parseInt(minPrice) || undefined,
+      lte: parseInt(maxPrice) || undefined,
+    },
+    // Only include city if we’re *not* doing a radius search:
+    ...(lat && lon ? {} : { city: city || undefined }),
+  };
 
   try {
+    // 1) Fetch all posts matching baseWhere
     const posts = await prisma.post.findMany({
-      where: {
-        city: query.city || undefined,
-        type: query.type || undefined,
-        property: query.property || undefined,
-        bedroom: parseInt(query.bedroom) || undefined,
-        price: {
-          gte: parseInt(query.minPrice) || undefined,
-          lte: parseInt(query.maxPrice) || undefined,
-        },
-      },
+      where: baseWhere,
     });
 
-    // setTimeout(() => {
+    // 2) If lat/lon provided, filter by distance
+    if (lat && lon) {
+      const centerLat = parseFloat(lat);
+      const centerLon = parseFloat(lon);
+      const maxDist = parseFloat(radius);
+
+      const nearby = posts.filter((post) => {
+        const pLat = parseFloat(post.latitude);
+        const pLon = parseFloat(post.longitude);
+        if (isNaN(pLat) || isNaN(pLon)) return false;
+        const dist = getDistanceInKm(centerLat, centerLon, pLat, pLon);
+        return dist <= maxDist;
+      });
+
+      return res.status(200).json(nearby);
+    }
+
     res.status(200).json(posts);
-    // }, 3000);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to get posts" });
@@ -57,12 +101,11 @@ export const getPost = async (req, res) => {
             },
           });
           res.status(200).json({ ...post, isSaved: saved ? true : false });
-        }else{
+        } else {
           res.status(200).json({ ...post, isSaved: false });
         }
       });
-    }else{
-      
+    } else {
       res.status(200).json({ ...post, isSaved: false });
     }
   } catch (err) {

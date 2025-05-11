@@ -16,7 +16,11 @@ function ListPage() {
           <Suspense fallback={<p>Loading...</p>}>
             <Await resolve={data.postResponse} errorElement={<p>Error loading posts!</p>}>
               {(postResponse) =>
-                postResponse.data.map((post) => <Card key={post.id} item={post} />)
+                postResponse.data.length > 0 ? (
+                  postResponse.data.map((post) => <Card key={post.id} item={post} />)
+                ) : (
+                  <span>No posts found :(</span>
+                )
               }
             </Await>
           </Suspense>

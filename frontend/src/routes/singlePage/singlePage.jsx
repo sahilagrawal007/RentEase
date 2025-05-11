@@ -6,6 +6,7 @@ import DOMPurify from "dompurify";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import apiRequest from "../../lib/apiRequest";
+import { toast } from "react-toastify";
 
 function SinglePage() {
   const post = useLoaderData();
@@ -26,6 +27,7 @@ function SinglePage() {
       await apiRequest.post("/users/save", { postId: post.id });
     } catch (err) {
       console.log(err);
+      toast.error(err.response.data.message);
       setSaved((prev) => !prev);
     }
   };
@@ -81,13 +83,13 @@ function SinglePage() {
                 {post.postDetail.pet === "allowed" ? <p>Pets Allowed</p> : <p>Pets not Allowed</p>}
               </div>
             </div>
-            <div className="feature">
+            {/* <div className="feature">
               <img src="/fee.png" alt="" />
               <div className="featureText">
                 <span>Income Policy</span>
                 <p>{post.postDetail.income}</p>
               </div>
-            </div>
+            </div> */}
           </div>
           <p className="title">Sizes</p>
           <div className="sizes">

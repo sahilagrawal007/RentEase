@@ -11,7 +11,7 @@ function NewPostPage() {
   const [images, setImages] = useState([]);
   const [error, setError] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,17 +37,18 @@ function NewPostPage() {
           desc: value,
           utilities: inputs.utilities,
           pet: inputs.pet,
-          income: inputs.income,
+          // income: inputs.income,
           size: parseInt(inputs.size),
           school: parseInt(inputs.school),
           bus: parseInt(inputs.bus),
           restaurant: parseInt(inputs.restaurant),
         },
       });
-      navigate("/"+res.data.id)
+      navigate("/" + res.data.id);
     } catch (err) {
       console.log(err);
-      setError(error);
+      setError(err.response.data.message);
+      toast.error(err.response.data.message);
     }
   };
 
@@ -127,10 +128,10 @@ function NewPostPage() {
                 <option value="not-allowed">Not Allowed</option>
               </select>
             </div>
-            <div className="item">
+            {/* <div className="item">
               <label htmlFor="income">Income Policy</label>
               <input id="income" name="income" type="text" placeholder="Income Policy" />
-            </div>
+            </div> */}
             <div className="item">
               <label htmlFor="size">Total Size (sqft)</label>
               <input min={0} id="size" name="size" type="number" />

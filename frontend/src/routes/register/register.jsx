@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 import apiRequest from "../../lib/apiRequest";
+import { toast } from "react-toastify";
 
 function Register() {
   const [error, setError] = useState("");
@@ -12,7 +13,7 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("")
+    setError("");
     setIsLoading(true);
     const formData = new FormData(e.target);
 
@@ -30,6 +31,7 @@ function Register() {
       navigate("/login");
     } catch (err) {
       setError(err.response.data.message);
+      toast.error(err.response.data.message);
     } finally {
       setIsLoading(false);
     }

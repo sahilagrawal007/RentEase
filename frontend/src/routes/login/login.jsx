@@ -3,12 +3,13 @@ import "./login.scss";
 import { Link, useNavigate } from "react-router-dom";
 import apiRequest from "../../lib/apiRequest";
 import { AuthContext } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
 function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const {updateUser} = useContext(AuthContext)
+  const { updateUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
@@ -27,11 +28,12 @@ function Login() {
         password,
       });
 
-      updateUser(res.data)
+      updateUser(res.data);
 
       navigate("/");
     } catch (err) {
       setError(err.response.data.message);
+      toast.error(err.response.data.message);
     } finally {
       setIsLoading(false);
     }
@@ -49,12 +51,7 @@ function Login() {
             type="text"
             placeholder="Username"
           />
-          <input
-            name="password"
-            type="password"
-            required
-            placeholder="Password"
-          />
+          <input name="password" type="password" required placeholder="Password" />
           <button disabled={isLoading}>Login</button>
           {error && <span>{error}</span>}
           <Link to="/register">{"Don't"} you have an account?</Link>

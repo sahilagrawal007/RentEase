@@ -5,6 +5,7 @@ import apiRequest from "../../lib/apiRequest";
 import { format } from "timeago.js";
 import { SocketContext } from "../../context/SocketContext";
 import { useNotificationStore } from "../../lib/notificationStore";
+import { toast } from "react-toastify";
 
 function Chat({ chats }) {
   const [chat, setChat] = useState(null);
@@ -48,6 +49,7 @@ function Chat({ chats }) {
       });
     } catch (err) {
       console.log(err);
+      toast.error(err);
     }
   };
 
@@ -83,9 +85,7 @@ function Chat({ chats }) {
             key={c.id}
             style={{
               backgroundColor:
-                c.seenBy.includes(currentUser.id) || chat?.id === c.id
-                  ? "white"
-                  : "#fecd514e",
+                c.seenBy.includes(currentUser.id) || chat?.id === c.id ? "white" : "#fecd514e",
             }}
             onClick={() => handleOpenChat(c.id, c.receiver)}
           >
@@ -111,12 +111,8 @@ function Chat({ chats }) {
               <div
                 className="chatMessage"
                 style={{
-                  alignSelf:
-                    message.userId === currentUser.id
-                      ? "flex-end"
-                      : "flex-start",
-                  textAlign:
-                    message.userId === currentUser.id ? "right" : "left",
+                  alignSelf: message.userId === currentUser.id ? "flex-end" : "flex-start",
+                  textAlign: message.userId === currentUser.id ? "right" : "left",
                 }}
                 key={message.id}
               >
