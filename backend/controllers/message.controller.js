@@ -35,8 +35,7 @@ export const addMessage = async (req, res) => {
       where: { id: chatId },
       data: {
         seenBy: [tokenUserId],
-        lastMessage: text,
-        updatedAt: new Date(), // Ensure chat sorting by recent activity
+        lastMessage: text
       },
     });
 

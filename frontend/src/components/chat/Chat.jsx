@@ -20,7 +20,7 @@ function Chat({ chats, initialChatId }) {
   const messageEndRef = useRef();
   const messageInputRef = useRef(null);
 
-  const decrease = useNotificationStore((state) => state.decrease);
+  const { increase, reset } = useNotificationStore.getState ? useNotificationStore.getState() : { increase: () => {}, reset: () => {} };
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -39,10 +39,10 @@ function Chat({ chats, initialChatId }) {
   const handleOpenChat = async (id, receiver) => {
     setIsLoading(true);
     try {
+      // Mark chat as read
+      await apiRequest.put(`/chats/read/${id}`);
+      reset(id); // Reset unread count for this chat
       const res = await apiRequest.get(`/chats/${id}?page=${page}&limit=20`);
-      if (!res.data.seenBy.includes(currentUser.id)) {
-        decrease();
-      }
       setChat({ ...res.data, receiver });
       setMessageText(""); // Clear message input when opening new chat
     } catch (err) {
@@ -111,16 +111,6 @@ function Chat({ chats, initialChatId }) {
   };
 
   useEffect(() => {
-    const read = async () => {
-      if (!chat) return;
-      
-      try {
-        await apiRequest.put(`/chats/read/${chat.id}`);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     if (chat && socket) {
       socket.on("getMessage", (data) => {
         if (chat.id === data.chatId) {
@@ -129,7 +119,9 @@ function Chat({ chats, initialChatId }) {
             messages: [...prev.messages, data],
             lastMessage: data.text,
           }));
-          read();
+        } else {
+          // Not the currently open chat: increase notification count
+          increase(data.chatId);
         }
       });
     }
