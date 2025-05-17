@@ -1,6 +1,14 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthContextProvider");
+  }
+  return context;
+};
 
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(
@@ -16,7 +24,7 @@ export const AuthContextProvider = ({ children }) => {
   }, [currentUser]);
 
   return (
-    <AuthContext.Provider value={{ currentUser,updateUser }}>
+    <AuthContext.Provider value={{ currentUser, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

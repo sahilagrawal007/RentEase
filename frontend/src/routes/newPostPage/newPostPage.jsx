@@ -1,10 +1,10 @@
 import { useState } from "react";
-import "./newPostPage.scss";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import apiRequest from "../../lib/apiRequest";
-import UploadWidget from "../../components/uploadWidget/UploadWidget";
 import { useNavigate } from "react-router-dom";
+import UploadWidget from "../../components/uploadWidget/UploadWidget";
+import apiRequest from "../../lib/apiRequest";
+import "./newPostPage.scss";
 
 function NewPostPage() {
   const [value, setValue] = useState("");
@@ -44,7 +44,7 @@ function NewPostPage() {
           restaurant: parseInt(inputs.restaurant),
         },
       });
-      navigate("/" + res.data.id);
+      navigate("/post/" + res.data.id);
     } catch (err) {
       console.log(err);
       setError(err.response.data.message);

@@ -1,5 +1,6 @@
-import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
+import { ObjectId } from "mongodb";
+import prisma from "../lib/prisma.js";
 
 // Haversine formula: returns distance (in km) between two coords
 function getDistanceInKm(lat1, lon1, lat2, lon2) {
@@ -37,7 +38,7 @@ export const getPosts = async (req, res) => {
       gte: parseInt(minPrice) || undefined,
       lte: parseInt(maxPrice) || undefined,
     },
-    // Only include city if we’re *not* doing a radius search:
+    // Only include city if we're *not* doing a radius search:
     ...(lat && lon ? {} : { city: city || undefined }),
   };
 
@@ -73,6 +74,12 @@ export const getPosts = async (req, res) => {
 
 export const getPost = async (req, res) => {
   const id = req.params.id;
+  
+  // Validate ObjectId format
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid post ID format" });
+  }
+
   try {
     const post = await prisma.post.findUnique({
       where: { id },
@@ -87,29 +94,37 @@ export const getPost = async (req, res) => {
       },
     });
 
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
     const token = req.cookies?.token;
 
-    if (token) {
-      jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, payload) => {
-        if (!err) {
-          const saved = await prisma.savedPost.findUnique({
-            where: {
-              userId_postId: {
-                postId: id,
-                userId: payload.id,
-              },
-            },
-          });
-          res.status(200).json({ ...post, isSaved: saved ? true : false });
-        } else {
-          res.status(200).json({ ...post, isSaved: false });
-        }
+    if (!token) {
+      return res.status(200).json({ ...post, isSaved: false });
+    }
+
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
+      const saved = await prisma.savedPost.findUnique({
+        where: {
+          userId_postId: {
+            postId: id,
+            userId: payload.id,
+          },
+        },
       });
-    } else {
-      res.status(200).json({ ...post, isSaved: false });
+      return res.status(200).json({ ...post, isSaved: saved ? true : false });
+    } catch (jwtError) {
+      console.error("JWT verification error:", jwtError);
+      // If JWT verification fails, return post without saved status
+      return res.status(200).json({ ...post, isSaved: false });
     }
   } catch (err) {
-    console.log(err);
+    console.error("Database error in getPost:", err);
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: "Post not found" });
+    }
     res.status(500).json({ message: "Failed to get post" });
   }
 };

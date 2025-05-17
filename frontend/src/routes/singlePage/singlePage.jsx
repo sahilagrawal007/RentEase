@@ -1,12 +1,11 @@
-import "./singlePage.scss";
-import Slider from "../../components/slider/Slider";
-import Map from "../../components/map/Map";
-import { useNavigate, useLoaderData } from "react-router-dom";
-import DOMPurify from "dompurify";
 import { useContext, useState } from "react";
+import { useLoaderData, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Map from "../../components/map/Map";
+import Slider from "../../components/slider/Slider";
 import { AuthContext } from "../../context/AuthContext";
 import apiRequest from "../../lib/apiRequest";
-import { toast } from "react-toastify";
+import "./singlePage.scss";
 
 function SinglePage() {
   const post = useLoaderData();
@@ -14,20 +13,55 @@ function SinglePage() {
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleChatRedirect = () => {
-    navigate("/chat");
+  const handleChatRedirect = async () => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+
+    // Don't allow users to chat with themselves
+    if (currentUser.id === post.userId) {
+      toast.warning("You cannot chat with yourself!");
+      return;
+    }
+
+    try {
+      console.log("Creating chat with:", {
+        receiverId: post.userId,
+        postId: post.id,
+        currentUserId: currentUser.id
+      });
+
+      // Create or get existing chat with the post owner
+      const res = await apiRequest.post("/chats", {
+        receiverId: post.userId,
+        postId: post.id
+      });
+      
+      if (res.data && res.data.id) {
+        // Navigate to messages page with the chat ID
+        navigate(`/messages?chat=${res.data.id}`);
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (err) {
+      console.error("Chat creation error:", err);
+      const errorMessage = err.response?.data?.message || "Failed to start chat";
+      toast.error(errorMessage);
+    }
   };
 
   const handleSave = async () => {
     if (!currentUser) {
       navigate("/login");
+      return;
     }
     setSaved((prev) => !prev);
     try {
       await apiRequest.post("/users/save", { postId: post.id });
     } catch (err) {
-      console.log(err);
-      toast.error(err.response.data.message);
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to save post");
       setSaved((prev) => !prev);
     }
   };
@@ -45,19 +79,16 @@ function SinglePage() {
                   <img src="/pin.png" alt="" />
                   <span>{post.address}</span>
                 </div>
-                <div className="price">₹ {post.price}</div>
+                <div className="price">$ {post.price}</div>
               </div>
               <div className="user">
-                <img src={post.user.avatar} alt="" />
+                <img src={post.user.avatar || "/noavatar.jpg"} alt="" />
                 <span>{post.user.username}</span>
               </div>
             </div>
-            <div
-              className="bottom"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(post.postDetail.desc),
-              }}
-            ></div>
+            <div className="bottom">
+              {post.postDetail.desc}
+            </div>
           </div>
         </div>
       </div>
@@ -69,27 +100,23 @@ function SinglePage() {
               <img src="/utility.png" alt="" />
               <div className="featureText">
                 <span>Utilities</span>
-                {post.postDetail.utilities === "owner" ? (
-                  <p>Owner is responsible</p>
-                ) : (
-                  <p>Tenant is responsible</p>
-                )}
+                <p>{post.postDetail.utilities}</p>
               </div>
             </div>
             <div className="feature">
               <img src="/pet.png" alt="" />
               <div className="featureText">
                 <span>Pet Policy</span>
-                {post.postDetail.pet === "allowed" ? <p>Pets Allowed</p> : <p>Pets not Allowed</p>}
+                <p>{post.postDetail.pet}</p>
               </div>
             </div>
-            {/* <div className="feature">
+            <div className="feature">
               <img src="/fee.png" alt="" />
               <div className="featureText">
                 <span>Income Policy</span>
                 <p>{post.postDetail.income}</p>
               </div>
-            </div> */}
+            </div>
           </div>
           <p className="title">Sizes</p>
           <div className="sizes">
@@ -112,12 +139,7 @@ function SinglePage() {
               <img src="/school.png" alt="" />
               <div className="featureText">
                 <span>School</span>
-                <p>
-                  {post.postDetail.school > 999
-                    ? post.postDetail.school / 1000 + "km"
-                    : post.postDetail.school + "m"}{" "}
-                  away
-                </p>
+                <p>{post.postDetail.school}m away</p>
               </div>
             </div>
             <div className="feature">

@@ -1,0 +1,21 @@
+.message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.message:hover {
+  background-color: #45a049;
+}
+
+.message img {
+  width: 20px;
+  height: 20px;
+} 
