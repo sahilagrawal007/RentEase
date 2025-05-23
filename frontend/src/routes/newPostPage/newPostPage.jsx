@@ -100,7 +100,7 @@ function NewPostPage() {
                 <option value="rent" defaultChecked>
                   Rent
                 </option>
-                <option value="buy">Buy</option>
+                
               </select>
             </div>
             <div className="item">

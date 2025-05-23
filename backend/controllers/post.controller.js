@@ -75,11 +75,6 @@ export const getPosts = async (req, res) => {
 export const getPost = async (req, res) => {
   const id = req.params.id;
   
-  // Validate ObjectId format
-  if (!ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid post ID format" });
-  }
-
   try {
     const post = await prisma.post.findUnique({
       where: { id },
@@ -125,7 +120,7 @@ export const getPost = async (req, res) => {
     if (err.code === 'P2025') {
       return res.status(404).json({ message: "Post not found" });
     }
-    res.status(500).json({ message: "Failed to get post" });
+    res.status(500).json({ message: "Failed to get post", error: process.env.NODE_ENV === 'development' ? err.message : undefined });
   }
 };
 

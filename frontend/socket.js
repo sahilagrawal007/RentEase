@@ -5,7 +5,10 @@ let socket = null;
 
 export const initSocket = () => {
   if (!socket) {
-    socket = io("http://localhost:5000"); // Update with your backend URL/port
+    socket = io("http://localhost:8800", {
+      withCredentials: true,
+      transports: ['websocket', 'polling']
+    });
   }
   return socket;
 };
